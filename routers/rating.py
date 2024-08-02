@@ -1,22 +1,13 @@
-from datetime import timedelta
-from fastapi import APIRouter, Depends, Form,HTTPException,status,Response
-import schemas,database
-from database import engine, SessionLocal
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import models, schemas
-from typing import Annotated, List
-import oauth2
+from typing import List
+import schemas, database, models, oauth2
 
 router = APIRouter(
     tags=["Ratings"]
-    
 )
 
 get_db = database.get_db
-
-
-
-
 
 @router.post("/movie/{movie_id}/rate", response_model=schemas.Rating)
 def rate_movie(movie_id: int, request: schemas.Rating, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
@@ -26,10 +17,7 @@ def rate_movie(movie_id: int, request: schemas.Rating, db: Session = Depends(get
     db.refresh(new_rating)
     return new_rating
 
-
 @router.get("/movie/{movie_id}/ratings", response_model=List[schemas.Rating])
 def get_all_ratings(movie_id: int, db: Session = Depends(get_db)):
     ratings = db.query(models.Rating).filter(models.Rating.movie_id == movie_id).all()
     return ratings
-
-

@@ -1,91 +1,63 @@
-from datetime import timedelta
-from fastapi import APIRouter, Depends, Form,HTTPException,status,Response
-import schemas,database
-from database import engine, SessionLocal
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
-import models, schemas
-from typing import Annotated
-import oauth2
+from typing import List
+import schemas, database, models, oauth2
 
 router = APIRouter(
     tags=["Movies"]
-    
 )
 
 get_db = database.get_db
 
-
-@router.post("/movie", status_code=status.HTTP_201_CREATED, response_model=schemas.Movie)
-def list_movie(request: schemas.Movie, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
+@router.post("/movies", response_model=schemas.Movie)
+def create_movie(request: schemas.Movie, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
     new_movie = models.Movie(
         title=request.title,
         release_date=request.release_date,
         genre=request.genre,
         director=request.director,
         synopsis=request.synopsis,
-        rating=request.rating,
         runtime=request.runtime,
         language=request.language,
-        user_id=get_current_user
+        user_id=get_current_user.id  
     )
-
     db.add(new_movie)
     db.commit()
     db.refresh(new_movie)
     return new_movie
 
-
-
-@router.get("/movie",status_code=status.HTTP_200_OK)
-def get_all(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-    movies = db.query(models.Movie).offset(skip).limit(limit).all()
- 
+@router.get("/movies", response_model=List[schemas.Movie])
+def get_movies(db: Session = Depends(get_db)):
+    movies = db.query(models.Movie).all()
     return movies
 
-
-@router.get("/movie/{id}")
-def get(id:int, db:Session = Depends(get_db)):
-    movie = db.query(models.Movie).filter(models.Movie.id == id).first()
-
-    if not  movie:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Movie not found")
-    
-    return movie
-
-@router.put("/movie/{id}", response_model=schemas.Movie)
-def update_movie(id: int, request: schemas.UpdateMovie, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
-    movie = db.query(models.Movie).filter(models.Movie.id == id).first()
-
+@router.get("/movies/{movie_id}", response_model=schemas.Movie)
+def get_movie(movie_id: int, db: Session = Depends(get_db)):
+    movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
     if not movie:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    return movie
+
+@router.put("/movies/{movie_id}", response_model=schemas.Movie)
+def update_movie(movie_id: int, request: schemas.UpdateMovie, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
+    movie_query = db.query(models.Movie).filter(models.Movie.id == movie_id)
+    movie = movie_query.first()
 
     if movie.user_id != get_current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update this movie")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this movie")
 
-    movie.title = request.title
-    movie.release_date = request.release_date
-    movie.genre = request.genre
-    movie.director = request.director
-    movie.synopsis = request.synopsis
-    movie.rating = request.rating
-    movie.runtime = request.runtime
-    movie.language = request.language
-
+    movie_query.update(request.dict())
     db.commit()
-    db.refresh(movie)
-    return movie
+    return movie_query.first()
 
+@router.delete("/movies/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_movie(movie_id: int, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
+    movie_query = db.query(models.Movie).filter(models.Movie.id == movie_id)
+    movie = movie_query.first()
 
-@router.delete("/movie/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_movie(id: int, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
-    movie = db.query(models.Movie).filter(models.Movie.id == id).first()
+    if movie.user_id != get_current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this movie")
 
-    if not movie:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
-
-    if movie.user_id != get_current_user:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete this movie")
-
-    db.delete(movie)
+    movie_query.delete()
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -3,29 +3,38 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class User(BaseModel):
-    id:int
-    username:str
-    password:str
-    email:str
-    firstName:str
-    lastName:str
+    id: int
+    username: str
+    password: str
+    email: str
+    firstName: str
+    lastName: str
+
+    class Config:
+        orm_mode = True
+
 
 class Login(BaseModel):
-    username:str
-    password:str
+    username: str
+    password: str
+
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 
+
 class TokenData(BaseModel):
     username: str | None = None
 
 
+
 class Movie(BaseModel):
+   
     title: str
-    release_date: str
+    release_date:datetime
     genre: str
     director: str
     synopsis: Optional[str] = None
@@ -35,6 +44,7 @@ class Movie(BaseModel):
 
 class UpdateMovie(Movie):
     pass
+
 
 class Rating(BaseModel):
     rating: float
@@ -49,9 +59,6 @@ class Comment(BaseModel):
     movie_id: int
     parent_id: Optional[int] = None
 
-class config():
-    orm_mode = True 
-
 
 class CommentResponse(BaseModel):
     id: int
@@ -62,7 +69,7 @@ class CommentResponse(BaseModel):
     created_at: datetime
     replies: List['CommentResponse'] = []
 
-class Config:
+    class Config:
         orm_mode = True
 
 CommentResponse.update_forward_refs()

@@ -1,19 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
-from sqlalchemy.orm import Session
-
-from hashing import Hash
-import models, schemas, hashing
-from database import engine, get_db
-from routers import users, movie, ratings,comments
-
-models.Base.metadata.create_all(bind=engine)
+from fastapi import FastAPI
+import models
+from database import engine
+from routers import auth, rating, movie, comments
 
 app = FastAPI()
 
-app.include_router(users.router)
+models.Base.metadata.create_all(bind=engine)
+
+app.include_router(auth.router)
+app.include_router(rating.router)
 app.include_router(movie.router)
-app.include_router(ratings.router)
 app.include_router(comments.router)
+
 
 
 
