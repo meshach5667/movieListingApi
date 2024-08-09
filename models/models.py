@@ -1,6 +1,6 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
-from database import Base
+from database.database import Base
 from datetime import datetime
 
 class User(Base):

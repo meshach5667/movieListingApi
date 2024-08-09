@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from typing import List
-import schemas, database, models, oauth2
+import schemas.schemas as schemas, database.database as database, models.models as models, auth.oauth2 as oauth2
 
 router = APIRouter(
     tags=["Movies"]
@@ -26,12 +26,12 @@ def create_movie(request: schemas.Movie, db: Session = Depends(get_db), get_curr
     db.refresh(new_movie)
     return new_movie
 
-@router.get("/movies", response_model=List[schemas.Movie])
+@router.get("/movies", response_model=List[schemas.MovieResponse])
 def get_movies(db: Session = Depends(get_db)):
     movies = db.query(models.Movie).all()
     return movies
 
-@router.get("/movies/{movie_id}", response_model=schemas.Movie)
+@router.get("/movies/{movie_id}", response_model=schemas.MovieResponse)
 def get_movie(movie_id: int, db: Session = Depends(get_db)):
     movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
     if not movie:

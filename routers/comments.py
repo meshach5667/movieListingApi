@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from typing import List
-import schemas, database, models, oauth2
+import schemas.schemas as schemas, database.database as database, models.models as models, auth.oauth2 as oauth2
 
 router = APIRouter(
     tags=["Comments"]
