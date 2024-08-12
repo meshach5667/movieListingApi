@@ -41,7 +41,7 @@ Base.metadata.create_all(bind=engine)
 # Create a test user
 @pytest.fixture
 def test_user():
-    user = User(username="test2", password="test2", email="test2@example.com", firstName="Test2", lastName="User2")
+    user = User(username="test3", password="test3", email="test3@example.com", firstName="Test3", lastName="User3")
     db = TestingSessionLocal()
     db.add(user)
     db.commit()

@@ -1,9 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List, Optional
 
 class User(BaseModel):
-    # id: int
     username: str
     password: str
     email: str
@@ -11,9 +10,10 @@ class User(BaseModel):
     lastName: str
 
 class UserResponse(BaseModel):
-    id:int
-    username:str
-    password:str
+    id: int
+    username: str
+    password: str
+    
     class Config:
         orm_mode = True
 
@@ -24,11 +24,11 @@ class Login(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 class TokenData(BaseModel):
     id: str
 
 class Movie(BaseModel):
-    id:Optional[int] = None
     title: str
     release_date: datetime
     genre: str
@@ -36,14 +36,21 @@ class Movie(BaseModel):
     synopsis: Optional[str] = None
     runtime: Optional[int] = None
     language: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+        from_attributes = True  # Ensures `from_orm` works
 
 class MovieResponse(BaseModel):
-    id:int
-    title:str
-    genre:str
-    synopsis:str
-    language:str
+    id: int
+    title: str
+    genre: str
+    synopsis: str
+    language: str
     release_date: datetime
+    
+    class Config:
+        orm_mode = True
 
 class UpdateMovie(Movie):
     pass
@@ -51,7 +58,7 @@ class UpdateMovie(Movie):
 class Rating(BaseModel):
     rating: float
     movie_id: int
-
+    
     class Config:
         orm_mode = True
 
@@ -65,8 +72,7 @@ class CommentResponse(BaseModel):
     content: str
     movie_id: int
     user_id: int
-   
-
+    
     class Config:
         orm_mode = True
 
