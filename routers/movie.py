@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, status
-from auth import oauth2
+import oauth2
 from crud.movies import create_movie, get_movies, get_movie, update_movie, delete_movie
 from sqlalchemy.orm import Session
 from database.database import get_db
