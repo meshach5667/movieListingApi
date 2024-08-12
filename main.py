@@ -6,6 +6,7 @@ from log import logger
 
 app = FastAPI()
 
+
 models.Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)

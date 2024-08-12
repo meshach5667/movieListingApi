@@ -2,8 +2,8 @@ from fastapi import HTTPException, Response, status
 from sqlalchemy.orm import Session
 from models.models import Movie  # SQLAlchemy model
 from schemas import schemas
-from schemas.schemas import UpdateMovie  # Pydantic model
-from oauth2 import get_current_user
+from schemas.schemas import Movie, UpdateMovie
+from auth.oauth2 import get_current_user
 from database.database import get_db
 
 def create_movie(request: schemas.Movie, db: Session, get_current_user: schemas.User):

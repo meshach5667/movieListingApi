@@ -11,7 +11,7 @@ get_db = database.get_db
 
 @router.post("/movie/{movie_id}/comment", response_model=schemas.CommentResponse)
 def create_comment(movie_id: int, request: schemas.Comment, db: Session = Depends(get_db), get_current_user: schemas.User = Depends(oauth2.get_current_user)):
-    new_comment = models.Comment(content=request.content, movie_id=movie_id)
+    new_comment = models.Comment(**request.dict(), movie_id=movie_id, user_id=get_current_user.id)
     db.add(new_comment)
     db.commit()
     db.refresh(new_comment)
