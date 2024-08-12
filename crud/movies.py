@@ -2,8 +2,8 @@ from fastapi import HTTPException, Response, status
 from sqlalchemy.orm import Session
 from models.models import Movie  # SQLAlchemy model
 from schemas import schemas
-from schemas.schemas import Movie, UpdateMovie
-from auth.oauth2 import get_current_user
+from schemas.schemas import UpdateMovie  # Pydantic model
+from oauth2 import get_current_user
 from database.database import get_db
 
 def create_movie(request: schemas.Movie, db: Session, get_current_user: schemas.User):
@@ -42,9 +42,10 @@ def update_movie(movie_id: int, request: UpdateMovie, db: Session, get_current_u
     if movie.user_id != get_current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this movie")
 
-    movie_query.update(request.dict(), synchronize_session=False)
+    movie_query.update(request.dict(exclude_unset=True), synchronize_session=False)
     db.commit()
-    return movie_query.first()
+    updated_movie = schemas.Movie.from_orm(movie_query.first())
+    return updated_movie
 
 def delete_movie(movie_id: int, db: Session, get_current_user: schemas.User):
     movie_query = db.query(Movie).filter(Movie.id == movie_id)
@@ -58,4 +59,4 @@ def delete_movie(movie_id: int, db: Session, get_current_user: schemas.User):
 
     movie_query.delete(synchronize_session=False)
     db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return {"message": "Movie deleted successfully"}

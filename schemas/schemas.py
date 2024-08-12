@@ -28,6 +28,7 @@ class TokenData(BaseModel):
     id: str
 
 class Movie(BaseModel):
+    id:Optional[int] = None
     title: str
     release_date: datetime
     genre: str
@@ -64,9 +65,7 @@ class CommentResponse(BaseModel):
     content: str
     movie_id: int
     user_id: int
-    parent_id: Optional[int]
-    created_at: datetime
-    replies: List["CommentResponse"] = []
+   
 
     class Config:
         orm_mode = True

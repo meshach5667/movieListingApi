@@ -1,17 +1,16 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Float
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from database.database import Base
 from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password = Column(String)
-    email = Column(String, unique=True, index=True)
-    firstName = Column(String)
-    lastName = Column(String)
+    id = Column(Integer, primary_key=True)
+    username = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
 
     movies = relationship("Movie", back_populates="user")
     ratings = relationship("Rating", back_populates="user")
@@ -47,18 +46,13 @@ class Rating(Base):
     movie = relationship("Movie", back_populates="ratings")
     user = relationship("User", back_populates="ratings")
 
-
 class Comment(Base):
     __tablename__ = "comments"
-
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     content = Column(String, nullable=False)
     movie_id = Column(Integer, ForeignKey("movies.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    movie = relationship("Movie", back_populates="comments")
+    parent_id = Column(Integer, ForeignKey("comments.id"))
+    parent = relationship("Comment", remote_side=[id], backref="replies")
     user = relationship("User", back_populates="comments")
-    replies = relationship("Comment", back_populates="parent", remote_side=[id])
-    parent = relationship("Comment", back_populates="replies")
+    movie = relationship("Movie", back_populates="comments")
