@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from datetime import timedelta
 from ..main import app
 from database.database import Base, get_db
 from sqlalchemy import create_engine
@@ -12,11 +12,11 @@ from sqlalchemy.orm import sessionmaker
 from schemas.schemas import User, Movie, Comment, Rating
 from jwt_token import create_access_token
 from dotenv import load_dotenv
-import os
 
-# Create a test database
+# Load environment variables
 load_dotenv()
 
+# Create a test database
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -36,91 +36,140 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 # Create the database tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
-# Create a test user
-@pytest.fixture
-def test_user():
-    user = User(username="test3", password="test3", email="test3@example.com", firstName="Test3", lastName="User3")
-    db = TestingSessionLocal()
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+@pytest.fixture(scope="function", autouse=True)
+def setup_database():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
-# Create a test movie
-@pytest.fixture
-def test_movie(test_user):
-    movie = Movie(title="Test Movie", release_date="2022-01-01", genre="Action", director="Test Director", synopsis="Test synopsis", runtime=120, language="English")
-    db = TestingSessionLocal()
-    db.add(movie)
-    db.commit()
-    db.refresh(movie)
-    return movie
-
-# Create a test comment
-@pytest.fixture
-def test_comment(test_movie, test_user):
-    comment = Comment(content="Test comment", movie_id=test_movie.id, user_id=test_user.id)
-    db = TestingSessionLocal()
-    db.add(comment)
-    db.commit()
-    db.refresh(comment)
-    return comment
-
-# Create a test rating
-@pytest.fixture
-def test_rating(test_movie, test_user):
-    rating = Rating(rating=5, movie_id=test_movie.id, user_id=test_user.id)
-    db = TestingSessionLocal()
-    db.add(rating)
-    db.commit()
-    db.refresh(rating)
-    return rating
-
-# Test the create user endpoint
-def test_create_user():
-    response = client.post("/signup", json={"username": "test3", "password": "test3", "email": "test3@example.com", "firstName": "Test3", "lastName": "User3"})
+def test_signup():
+    response = client.post("/signup", json={
+        "username": "testuser",
+        "password": "password123",
+        "email": "testuser@example.com",
+        "firstName": "Test",
+        "lastName": "User"
+    })
     assert response.status_code == 201
-    assert response.json()["username"] == "test3"
+    assert response.json()["username"] == "testuser"
 
-# Test the login endpoint
-def test_login(test_user):
-    response = client.post("/login", data={"username": test_user.username, "password": test_user.password})
+def test_get_user():
+    # First create a user
+    client.post("/signup", json={
+        "username": "testuser",
+        "password": "password123",
+        "email": "testuser@example.com",
+        "firstName": "Test",
+        "lastName": "User"
+    })
+    response = client.get("/user/1")
     assert response.status_code == 200
-    assert response.json()["access_token"]
+    assert response.json()["username"] == "testuser"
 
-# Test the create movie endpoint
-def test_create_movie(test_user):
-    access_token = create_access_token(data={"sub": test_user.username})
-    response = client.post("/movies", json={"title": "Test Movie", "release_date": "2022-01-01", "genre": "Action", "director": "Test Director", "synopsis": "Test synopsis", "runtime": 120, "language": "English"}, headers={"Authorization": f"Bearer {access_token}"})
+
+def test_login():
+    client.post("/signup", json={
+        "username": "testuser",
+        "password": "password123",
+        "email": "testuser@example.com",
+        "firstName": "Test",
+        "lastName": "User"
+    })
+    response = client.post("/login", data={
+        "username": "testuser",
+        "password": "password123",
+    })
+    print(response.json())  # Debugging line
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json()["token_type"] == "bearer"
+
+def test_login_invalid_password():
+    # First create a user
+    client.post("/signup", json={
+        "username": "testuser",
+        "password": "password123",
+        "email": "testuser@example.com",
+        "firstName": "Test",
+        "lastName": "User"
+    })
+    response = client.post("/login", data={
+        "username": "testuser",
+        "password": "wrongpassword",
+    })
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid username or password"
+
+# Movie-related test cases
+
+def test_create_movie():
+    # First, authenticate the user
+    token = client.post("/login", data={
+        "username": "testuser",
+        "password": "password123",
+    }).json()["access_token"]
+
+    response = client.post(
+        "/movies/",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "title": "Test Movie",
+            "release_date": "2024-08-13",
+            "genre": "Action",
+            "director": "Jane Doe",
+            "synopsis": "An action-packed movie.",
+            "runtime": 120,
+            "language": "English",
+        }
+    )
     assert response.status_code == 200
     assert response.json()["title"] == "Test Movie"
 
-# Test the get movies endpoint
-def test_get_movies(test_movie, test_user):
-    access_token = create_access_token(data={"sub": test_user.username})
-    response = client.get("/movies", headers={"Authorization": f"Bearer {access_token}"})
+def test_get_movies():
+    response = client.get("/movies/")
     assert response.status_code == 200
     assert len(response.json()) > 0
 
-# Test the get movie endpoint
-def test_get_movie(test_movie, test_user):
-    access_token = create_access_token(data={"sub": test_user.username})
-    response = client.get(f"/movies/{test_movie.id}", headers={"Authorization": f"Bearer {access_token}"})
+def test_get_movie():
+    movie_id = 1
+    response = client.get(f"/movies/{movie_id}")
     assert response.status_code == 200
-    assert response.json()["title"] == test_movie.title
+    assert response.json()["title"] == "Test Movie"
 
-# Test the update movie endpoint
-def test_update_movie(test_movie, test_user):
-    access_token = create_access_token(data={"sub": test_user.username})
-    response = client.put(f"/movies/{test_movie.id}", json={"title": "Updated title"}, headers={"Authorization": f"Bearer {access_token}"})
+def test_update_movie():
+    # First, authenticate the user
+    token = client.post("/login", data={
+        "username": "testuser",
+        "password": "password123",
+    }).json()["access_token"]
+
+    movie_id = 1
+    response = client.put(
+        f"/movies/{movie_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"title": "Updated Movie Title"}
+    )
     assert response.status_code == 200
-    assert response.json()["title"] == "Updated title"
+    assert response.json()["title"] == "Updated Movie Title"
 
+def test_delete_movie():
+    # First, authenticate the user
+    token = client.post("/login", data={
+        "username": "testuser",
+        "password": "password123",
+    }).json()["access_token"]
 
+    movie_id = 1
+    response = client.delete(
+        f"/movies/{movie_id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"message": "Movie deleted successfully"}
 
-# Test the delete movie endpoint
-# def test_delete_movie(test_movie, test_user):
-#     access_token = create_access_token(data={"sub": test_user.username})
-#     response =
+    # Check if the movie is really deleted
+    response = client.get(f"/movies/{movie_id}")
+    assert response.status_code == 404

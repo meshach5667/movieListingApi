@@ -14,8 +14,8 @@ class UserResponse(BaseModel):
     username: str
     password: str
     
-    class Config:
-        orm_mode = True
+    class ConfigDict:
+        from_attributes = True
 
 class Login(BaseModel):
     username: str
@@ -37,9 +37,8 @@ class Movie(BaseModel):
     runtime: Optional[int] = None
     language: Optional[str] = None
     
-    class Config:
-        orm_mode = True
-        from_attributes = True  # Ensures `from_orm` works
+    class ConfigDict:
+        from_attributes = True
 
 class MovieResponse(BaseModel):
     id: int
@@ -49,8 +48,8 @@ class MovieResponse(BaseModel):
     language: str
     release_date: datetime
     
-    class Config:
-        orm_mode = True
+    class ConfigDict:
+        from_attributes = True
 
 class UpdateMovie(Movie):
     pass
@@ -59,8 +58,8 @@ class Rating(BaseModel):
     rating: float
     movie_id: int
     
-    class Config:
-        orm_mode = True
+    class ConfigDict:
+        from_attributes = True
 
 class Comment(BaseModel):
     content: str
@@ -73,7 +72,7 @@ class CommentResponse(BaseModel):
     movie_id: int
     user_id: int
     
-    class Config:
-        orm_mode = True
+    class ConfigDict:
+        from_attributes = True
 
 CommentResponse.update_forward_refs()
