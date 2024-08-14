@@ -1,7 +1,12 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Float
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, String, Float
 from sqlalchemy.orm import relationship, backref
 from database.database import Base
 from datetime import datetime
+from sqlalchemy.orm import declarative_base
+
+metadata = MetaData()
+Base = declarative_base(metadata=metadata)
+
 
 class User(Base):
     __tablename__ = "users"
