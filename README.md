@@ -11,6 +11,30 @@ This is a Movie Listing API developed using FastAPI. The API allows users to lis
 - **Documentation**: OpenAPI/Swagger
 - **Logging**: Python logging module
 
+
+## Features
+
+### User Authentication
+- **User Registration:** Allows new users to create an account.
+- **User Login:** Authenticates users and provides a JWT token.
+- **JWT Token Generation:** Issues a token to authenticated users for secure API access.
+
+### Movie Listing
+- **View a Movie (Public Access):** Anyone can view the details of a listed movie.
+- **Add a Movie (Authenticated Access):** Registered users can add new movies to the list.
+- **View All Movies (Public Access):** Anyone can view a list of all movies.
+- **Edit a Movie (Authenticated Access):** Only the user who listed a movie can edit its details.
+- **Delete a Movie (Authenticated Access):** Only the user who listed a movie can delete it.
+
+### Movie Rating
+- **Rate a Movie (Authenticated Access):** Registered users can rate listed movies.
+- **Get Ratings for a Movie (Public Access):** Anyone can view the ratings of a movie.
+
+### Comments
+- **Add a Comment to a Movie (Authenticated Access):** Registered users can add comments to movies.
+- **View Comments for a Movie (Public Access):** Anyone can view comments for a movie.
+- **Add a Comment to a Comment (Authenticated Access):** Allows nested commenting on existing comments.
+
 ## Setup and Installation
 
 ### Prerequisites
