@@ -97,6 +97,36 @@ def test_login_invalid_password():
     })
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid username or password"
+def authenticate_test_user():
+    response = client.post(
+        "/login",
+        data={"username": "testuser", "password": "password123"},
+    )
+    assert response.status_code == 200, "Authentication failed"
+    token_data = response.json()
+    assert "access_token" in token_data, f"Expected 'access_token' in response, got {token_data}"
+    return token_data["access_token"]
+
+@pytest.fixture(scope="module")
+def token():
+    return authenticate_test_user()
+
+def test_create_movie(token):
+    response = client.post(
+        "/movies/",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "title": "Test Movie",
+            "release_date": "2024-08-14",
+            "genre": "Drama",
+            "director": "John Doe",
+            "synopsis": "A drama-packed movie.",
+            "runtime": 150,
+            "language": "English",
+        }
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["title"] == "Test Movie"
 
 # Movie-related test cases
 
