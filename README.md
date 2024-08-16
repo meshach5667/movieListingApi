@@ -7,7 +7,7 @@ This is a Movie Listing API developed using FastAPI. The API allows users to lis
 
 - **Language & Framework**: Python, FastAPI
 - **Authentication**: JSON Web Tokens (JWT)
-- **Database**: SQL
+- **Database**: NoSQL
 - **Documentation**: OpenAPI/Swagger
 - **Logging**: Python logging module
 
@@ -40,7 +40,7 @@ This is a Movie Listing API developed using FastAPI. The API allows users to lis
 ### Prerequisites
 
 - Python 3.8 or higher
-- A SQL database
+- A NoSQL database
 
 ### Installation Steps
 
