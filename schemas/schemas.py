@@ -4,6 +4,7 @@ from typing import List, Optional
 from bson import ObjectId 
 
 class User(BaseModel):
+    id:str
     username: str
     password: str
     email: str
