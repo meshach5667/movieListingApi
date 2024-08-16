@@ -319,3 +319,4 @@
 2024-08-15 06:27:36,742 - movieListingApi - INFO - Application shutdown
 2024-08-15 06:27:51,811 - movieListingApi - INFO - Application startup
 2024-08-16 14:17:45,606 - movieListingApi - INFO - Application startup
+2024-08-16 14:17:52,815 - movieListingApi - INFO - Received request to root endpoint
