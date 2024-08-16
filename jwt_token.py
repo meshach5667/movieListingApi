@@ -4,7 +4,6 @@ from jose import JWTError
 import jwt
 from fastapi import HTTPException, status
 from pydantic import BaseModel, ValidationError
-from jwt.exceptions import InvalidTokenError
 from schemas.schemas import TokenData
 from dotenv import load_dotenv
 import os

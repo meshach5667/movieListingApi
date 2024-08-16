@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Optional
+from bson import ObjectId 
 
 class User(BaseModel):
     username: str
@@ -9,13 +10,16 @@ class User(BaseModel):
     firstName: str
     lastName: str
 
+    class Config:
+        orm_mode = True  
+
 class UserResponse(BaseModel):
-    id: int
+    id: str  
     username: str
     password: str
-    
-    class ConfigDict:
-        from_attributes = True
+
+    class Config:
+        orm_mode = True
 
 class Login(BaseModel):
     username: str
@@ -26,7 +30,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    id: str
+    id: str  # Changed to str to match MongoDB ObjectId type
 
 class Movie(BaseModel):
     title: str
@@ -37,42 +41,41 @@ class Movie(BaseModel):
     runtime: Optional[int] = None
     language: Optional[str] = None
     
-    class ConfigDict:
-        from_attributes = True
+    class Config:
+        orm_mode = True
 
 class MovieResponse(BaseModel):
-    id: int
+    id: str  # Changed to str to match MongoDB ObjectId type
     title: str
     genre: str
     synopsis: str
     language: str
     release_date: datetime
     
-    class ConfigDict:
-        from_attributes = True
+    class Config:
+        orm_mode = True
 
 class UpdateMovie(Movie):
     pass
 
 class Rating(BaseModel):
     rating: float
-    movie_id: int
+    movie_id: str  # Changed to str to match MongoDB ObjectId type
     
-    class ConfigDict:
-        from_attributes = True
+    class Config:
+        orm_mode = True
 
 class Comment(BaseModel):
     content: str
-    movie_id: int
-    parent_id: Optional[int] = None
+    movie_id: str  # Changed to str to match MongoDB ObjectId type
+    parent_id: Optional[str] = None  # Changed to str to match MongoDB ObjectId type
 
 class CommentResponse(BaseModel):
-    id: int
+    id: str  
     content: str
-    movie_id: int
-    user_id: int
-    
-    class ConfigDict:
-        from_attributes = True
+    movie_id: str  
+    user_id: str
+    class Config:
+        orm_mode = True
 
 CommentResponse.update_forward_refs()

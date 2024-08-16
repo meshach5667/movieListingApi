@@ -1,22 +1,21 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-# Make sure your environment variable is set correctly
-SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
+# Load the MongoDB connection URL from the environment variable
+MONGODB_URL = os.getenv("MONGODB_URL")
 
+# Create a Motor client
+client = AsyncIOMotorClient(MONGODB_URL)
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+# Specify the database name
+database = client.my_database
 
+# Example of accessing a collection
+my_collection = database.my_collection
+
+# Dependency function to get the database
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return database
