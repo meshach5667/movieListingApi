@@ -44,6 +44,10 @@ async def create_user(request: schemas.User, db: AsyncIOMotorDatabase = Depends(
     result = await db["users"].insert_one(new_user)
     created_user = await db["users"].find_one({"_id": result.inserted_id})
     
+    # Convert ObjectId to string for response
+    created_user["id"] = str(created_user["_id"])
+    created_user.pop("_id", None)
+    
     logger.info("User created successfully")
     return schemas.UserResponse(**created_user)
 
@@ -52,9 +56,13 @@ async def get_user(id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
     logger.info(f"Received request to retrieve user with id {id}")
     
     user = await db["users"].find_one({"_id": ObjectId(id)})
-    if not user:    
+    if not user:
         logger.warning(f"User with id {id} does not exist")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist")
+    
+    # Convert ObjectId to string for response
+    user["id"] = str(user["_id"])
+    user.pop("_id", None)
     
     logger.info(f"User with id {id} retrieved successfully")
     return schemas.User(**user)

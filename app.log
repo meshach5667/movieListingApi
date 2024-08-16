@@ -320,3 +320,23 @@
 2024-08-15 06:27:51,811 - movieListingApi - INFO - Application startup
 2024-08-16 14:17:45,606 - movieListingApi - INFO - Application startup
 2024-08-16 14:17:52,815 - movieListingApi - INFO - Received request to root endpoint
+2024-08-16 15:12:51,695 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:36:02,064 - movieListingApi - INFO - Application startup
+2024-08-16 15:37:01,805 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:37:07,516 - movieListingApi - INFO - Application startup
+2024-08-16 15:37:07,520 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:37:13,929 - movieListingApi - INFO - Application startup
+2024-08-16 15:37:13,935 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:37:20,011 - movieListingApi - INFO - Application startup
+2024-08-16 15:44:48,327 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:44:54,024 - movieListingApi - INFO - Application startup
+2024-08-16 15:45:15,539 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:45:20,433 - movieListingApi - INFO - Application startup
+2024-08-16 15:46:56,206 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:48:01,467 - movieListingApi - INFO - Application startup
+2024-08-16 15:49:59,644 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:51:36,517 - movieListingApi - INFO - Application startup
+2024-08-16 15:52:10,378 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:52:42,506 - movieListingApi - INFO - Application startup
+2024-08-16 15:55:53,567 - movieListingApi - INFO - Application shutdown
+2024-08-16 15:56:00,526 - movieListingApi - INFO - Application startup
