@@ -33,7 +33,7 @@ async def rate_movie(movie_id: str, request: schemas.Rating, db: AsyncIOMotorDat
     created_rating = await db["ratings"].find_one({"_id": result.inserted_id})
     
     logger.info(f"Rating created successfully for movie with id {movie_id}")
-    return schemas.RatingResponse(**created_rating)
+    return schemas.Rating(**created_rating)
 
 @router.get("/movie/{movie_id}/ratings", response_model=List[schemas.Rating])
 async def get_all_ratings(movie_id: str, db: AsyncIOMotorDatabase = Depends(get_db)):
