@@ -1,14 +1,23 @@
 from fastapi import FastAPI
-import models.models as models
-from database.database import engine
+from pymongo import MongoClient
 from routers import auth, rating, movie, comments
 from log import logger
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 
 
-models.Base.metadata.create_all(bind=engine)
+MONGO_DB_URL = os.getenv("MONGO_DB_URL")
+client = MongoClient(MONGO_DB_URL)
+db = client["movie_database"]  
 
+app.state.db = db
+
+# Include routers
 app.include_router(auth.router)
 app.include_router(rating.router)
 app.include_router(movie.router)

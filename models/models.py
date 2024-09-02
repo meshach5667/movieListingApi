@@ -1,63 +1,62 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, String, Float
-from sqlalchemy.orm import relationship, backref
-from database.database import Base
+from pydantic import BaseModel, Field, EmailStr
+from bson import ObjectId
+from typing import Optional, List
 from datetime import datetime
-from sqlalchemy.orm import declarative_base
 
-metadata = MetaData()
-Base = declarative_base(metadata=metadata)
+# Custom Pydantic Field for MongoDB ObjectId
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    firstName = Column(String, nullable=False)
-    lastName = Column(String, nullable=False)
+# Base Pydantic model with common attributes
+class MongoModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
-    movies = relationship("Movie", back_populates="user")
-    ratings = relationship("Rating", back_populates="user")
-    comments = relationship("Comment", back_populates="user")
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
 
+# User model
+class User(MongoModel):
+    username: str
+    password: str
+    email: EmailStr
+    firstName: str
+    lastName: str
+    movies: Optional[List[str]] = []  
+    comments: Optional[List[str]] = []
 
-class Movie(Base):
-    __tablename__ = "movies"
+# Movie model
+class Movie(MongoModel):
+    title: str
+    release_date: Optional[datetime]
+    genre: Optional[str]
+    director: Optional[str]
+    synopsis: Optional[str]
+    runtime: Optional[int]
+    language: Optional[str]
+    user_id: str  
+    ratings: Optional[List[str]] = []  
+    comments: Optional[List[str]] = [] 
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    release_date = Column(DateTime)
-    genre = Column(String)
-    director = Column(String)
-    synopsis = Column(String)
-    runtime = Column(Integer)
-    language = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
+# Rating model
+class Rating(MongoModel):
+    rating: float
+    movie_id: str  
+    user_id: str  
 
-    user = relationship("User", back_populates="movies")
-    ratings = relationship("Rating", back_populates="movie")
-    comments = relationship("Comment", back_populates="movie")
-
-
-class Rating(Base):
-    __tablename__ = "ratings"
-
-    id = Column(Integer, primary_key=True, index=True)
-    rating = Column(Float, nullable=False)
-    movie_id = Column(Integer, ForeignKey("movies.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
-
-    movie = relationship("Movie", back_populates="ratings")
-    user = relationship("User", back_populates="ratings")
-
-class Comment(Base):
-    __tablename__ = "comments"
-    id = Column(Integer, primary_key=True)
-    content = Column(String, nullable=False)
-    movie_id = Column(Integer, ForeignKey("movies.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
-    parent_id = Column(Integer, ForeignKey("comments.id"))
-    parent = relationship("Comment", remote_side=[id], backref="replies")
-    user = relationship("User", back_populates="comments")
-    movie = relationship("Movie", back_populates="comments")
+# Comment model
+class Comment(MongoModel):
+    content: str
+    movie_id: str 
+    user_id: str  
+    parent_id: Optional[str] = None 
+    replies: Optional[List[str]] = []  
